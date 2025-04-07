@@ -16,16 +16,22 @@ namespace AttrectoTest.Controllers
             _userService = userService;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet]
         public async Task<ActionResult<UserDTO>> GetUser(int id, CancellationToken cancellationToken)
         {
             try
             {
+                ArgumentOutOfRangeException.ThrowIfLessThan(id, 1);
+
                 return Ok(await _userService.GetUserAsync(id, cancellationToken));
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return Conflict($"Out of range");
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return NotFound($"Unknown error: {ex.Message}");
             }
         }
 
@@ -34,11 +40,18 @@ namespace AttrectoTest.Controllers
         {
             try
             {
+                ArgumentNullException.ThrowIfNullOrEmpty(user.Name);
+                ArgumentNullException.ThrowIfNullOrEmpty(user.Password);
+
                 return Ok(await _userService.SaveUserAsync(user, cancellationToken));
+            }
+            catch (ArgumentException ex)
+            {
+                return Conflict($"The value cannot be an empty");
             }
             catch (Exception ex)
             {
-                return Conflict(ex.Message);
+                return Conflict($"Unknown error: {ex.Message}");
             }
         }
 
@@ -47,11 +60,17 @@ namespace AttrectoTest.Controllers
         {
             try
             {
+                ArgumentOutOfRangeException.ThrowIfLessThan(id, 1);
+
                 return Ok(await _userService.DeleteUserAsync(id, cancellationToken));
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return Conflict($"Out of range");
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return NotFound($"Unknown error: {ex.Message}");
             }
         }
     }
